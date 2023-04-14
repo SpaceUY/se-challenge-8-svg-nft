@@ -12,7 +12,8 @@ import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import StackGrid from "react-stack-grid";
 import Web3Modal from "web3modal";
 import "./App.css";
-//import assets from "./assets.js";
+// import assets from "./assets.js";
+import { BlockPicker } from "react-color";
 import { Account, Address, AddressInput, Contract, Faucet, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
 import { DAI_ABI, DAI_ADDRESS, INFURA_ID, NETWORK, NETWORKS } from "./constants";
 import { Transactor } from "./helpers";
@@ -27,8 +28,6 @@ import {
   useOnBlock,
   useUserProvider,
 } from "./hooks";
-import { BlockPicker } from 'react-color'
-
 
 const { BufferList } = require("bl");
 // https://www.npmjs.com/package/ipfs-http-client
@@ -36,7 +35,7 @@ const ipfsAPI = require("ipfs-http-client");
 
 const ipfs = ipfsAPI({ host: "ipfs.infura.io", port: "5001", protocol: "https" });
 
-//console.log("📦 Assets: ", assets);
+// console.log("📦 Assets: ", assets);
 
 /*
     Welcome to 🏗 scaffold-eth !
@@ -58,7 +57,7 @@ const ipfs = ipfsAPI({ host: "ipfs.infura.io", port: "5001", protocol: "https" }
 */
 
 /// 📡 What chain are your contracts deployed to?
-const targetNetwork = NETWORKS.localhost; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+const targetNetwork = NETWORKS.matic; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 
 // 😬 Sorry for all the console logging
 const DEBUG = true;
@@ -119,13 +118,13 @@ function App(props) {
   const mainnetProvider = scaffoldEthProvider && scaffoldEthProvider._network ? scaffoldEthProvider : mainnetInfura;
 
   const logoutOfWeb3Modal = async () => {
-     await web3Modal.clearCachedProvider();
-     if (injectedProvider && injectedProvider.provider && typeof injectedProvider.provider.disconnect == "function") {
-       await injectedProvider.provider.disconnect();
-     }
-     setTimeout(() => {
-       window.location.reload();
-     }, 1);
+    await web3Modal.clearCachedProvider();
+    if (injectedProvider && injectedProvider.provider && typeof injectedProvider.provider.disconnect === "function") {
+      await injectedProvider.provider.disconnect();
+    }
+    setTimeout(() => {
+      window.location.reload();
+    }, 1);
   };
 
   const [injectedProvider, setInjectedProvider] = useState();
@@ -176,7 +175,7 @@ function App(props) {
   /*
   const myMainnetDAIBalance = useContractReader({ DAI: mainnetDAIContract }, "DAI", "balanceOf", [
     "0x34aA3F359A9D614239015126635CE7732c18fDF3",
-  ]);*/
+  ]); */
 
   // keep track of a variable from the contract in the local React state:
   const balance = useContractReader(readContracts, "YourCollectible", "balanceOf", [address]);
@@ -201,9 +200,9 @@ function App(props) {
           const tokenId = await readContracts.YourCollectible.tokenOfOwnerByIndex(address, tokenIndex);
           console.log("tokenId", tokenId);
           const tokenURI = await readContracts.YourCollectible.tokenURI(tokenId);
-          const jsonManifestString = atob(tokenURI.substring(29))
+          const jsonManifestString = atob(tokenURI.substring(29));
           console.log("jsonManifestString", jsonManifestString);
-/*
+          /*
           const ipfsHash = tokenURI.replace("https://ipfs.io/ipfs/", "");
           console.log("ipfsHash", ipfsHash);
 
@@ -217,7 +216,6 @@ function App(props) {
           } catch (e) {
             console.log(e);
           }
-
         } catch (e) {
           console.log(e);
         }
@@ -256,15 +254,7 @@ function App(props) {
       console.log("📝 readContracts", readContracts);
       console.log("🔐 writeContracts", writeContracts);
     }
-  }, [
-    mainnetProvider,
-    address,
-    selectedChainId,
-    yourLocalBalance,
-    yourMainnetBalance,
-    readContracts,
-    writeContracts,
-  ]);
+  }, [mainnetProvider, address, selectedChainId, yourLocalBalance, yourMainnetBalance, readContracts, writeContracts]);
 
   let networkDisplay = "";
   if (localChainId && selectedChainId && localChainId !== selectedChainId) {
@@ -368,7 +358,7 @@ function App(props) {
   const [transferToAddresses, setTransferToAddresses] = useState({});
 
   const [loadedAssets, setLoadedAssets] = useState();
-  /*useEffect(() => {
+  /* useEffect(() => {
     const updateYourCollectibles = async () => {
       const assetUpdate = [];
       for (const a in assets) {
@@ -387,7 +377,7 @@ function App(props) {
       setLoadedAssets(assetUpdate);
     };
     if (readContracts && readContracts.YourCollectible) updateYourCollectibles();
-  }, [assets, readContracts, transferEvents]);*/
+  }, [assets, readContracts, transferEvents]); */
 
   const galleryList = [];
 
@@ -430,14 +420,20 @@ function App(props) {
             */}
 
             <div style={{ maxWidth: 820, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
-              {isSigner?(
-                <Button type={"primary"} onClick={()=>{
-                  tx( writeContracts.YourCollectible.mintItem() )
-                }}>MINT</Button>
-              ):(
-                <Button type={"primary"} onClick={loadWeb3Modal}>CONNECT WALLET</Button>
+              {isSigner ? (
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    tx(writeContracts.YourCollectible.mintItem());
+                  }}
+                >
+                  MINT
+                </Button>
+              ) : (
+                <Button type="primary" onClick={loadWeb3Modal}>
+                  CONNECT WALLET
+                </Button>
               )}
-
             </div>
 
             <div style={{ width: 820, margin: "auto", paddingBottom: 256 }}>
@@ -447,7 +443,7 @@ function App(props) {
                 renderItem={item => {
                   const id = item.id.toNumber();
 
-                  console.log("IMAGE",item.image)
+                  console.log("IMAGE", item.image);
 
                   return (
                     <List.Item key={id + "_" + item.uri + "_" + item.owner}>
@@ -458,8 +454,16 @@ function App(props) {
                           </div>
                         }
                       >
-                        <a href={"https://opensea.io/assets/"+(readContracts && readContracts.YourCollectible && readContracts.YourCollectible.address)+"/"+item.id} target="_blank">
-                        <img src={item.image} />
+                        <a
+                          href={
+                            "https://opensea.io/assets/" +
+                            (readContracts && readContracts.YourCollectible && readContracts.YourCollectible.address) +
+                            "/" +
+                            item.id
+                          }
+                          target="_blank"
+                        >
+                          <img src={item.image} />
                         </a>
                         <div>{item.description}</div>
                       </Card>
@@ -497,17 +501,22 @@ function App(props) {
               />
             </div>
             <div style={{ maxWidth: 820, margin: "auto", marginTop: 32, paddingBottom: 256 }}>
-
-              🛠 built with <a href="https://github.com/austintgriffith/scaffold-eth" target="_blank">🏗 scaffold-eth</a>
-
-              🍴 <a href="https://github.com/austintgriffith/scaffold-eth" target="_blank">Fork this repo</a> and build a cool SVG NFT!
-
+              🛠 built with{" "}
+              <a href="https://github.com/austintgriffith/scaffold-eth" target="_blank">
+                🏗 scaffold-eth
+              </a>
+              🍴{" "}
+              <a href="https://github.com/austintgriffith/scaffold-eth" target="_blank">
+                Fork this repo
+              </a>{" "}
+              and build a cool SVG NFT!
             </div>
           </Route>
           <Route path="/debug">
-
-            <div style={{padding:32}}>
-              <Address value={readContracts && readContracts.YourCollectible && readContracts.YourCollectible.address} />
+            <div style={{ padding: 32 }}>
+              <Address
+                value={readContracts && readContracts.YourCollectible && readContracts.YourCollectible.address}
+              />
             </div>
 
             <Contract

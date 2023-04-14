@@ -14,18 +14,24 @@ import './ToColor.sol';
 // GET LISTED ON OPENSEA: https://testnets.opensea.io/get-listed/step-two
 
 contract YourCollectible is ERC721, Ownable {
-
   using Strings for uint256;
   using HexStrings for uint160;
   using ToColor for bytes3;
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
 
-  constructor() public ERC721("Loogies", "LOOG") {
+  constructor() public ERC721("SunsetLoogies", "SLOOG") {
     // RELEASE THE LOOGIES!
   }
 
+  struct Background {
+    bytes3 backgroundPrimaryColor;
+    bytes3 backgroundSecondaryColor;
+    bytes3 sunOrMoonColor;
+  }
+
   mapping (uint256 => bytes3) public color;
+  mapping (uint256 => Background) public background;
   mapping (uint256 => uint256) public chubbiness;
 
   uint256 mintDeadline = block.timestamp + 24 hours;
@@ -40,8 +46,11 @@ contract YourCollectible is ERC721, Ownable {
       uint256 id = _tokenIds.current();
       _mint(msg.sender, id);
 
-      bytes32 predictableRandom = keccak256(abi.encodePacked( blockhash(block.number-1), msg.sender, address(this), id ));
+      bytes32 predictableRandom = keccak256(abi.encodePacked( blockhash(block.number - 1), msg.sender, address(this), id ));
       color[id] = bytes2(predictableRandom[0]) | ( bytes2(predictableRandom[1]) >> 8 ) | ( bytes3(predictableRandom[2]) >> 16 );
+      background[id].backgroundPrimaryColor = bytes2(predictableRandom[3]) | ( bytes2(predictableRandom[4]) >> 8 ) | ( bytes3(predictableRandom[5]) >> 16 );
+      background[id].backgroundSecondaryColor = bytes2(predictableRandom[6]) | ( bytes2(predictableRandom[7]) >> 8 ) | ( bytes3(predictableRandom[8]) >> 16 );
+      background[id].sunOrMoonColor = bytes2(predictableRandom[9]) | ( bytes2(predictableRandom[10]) >> 8 ) | ( bytes3(predictableRandom[11]) >> 16 );
       chubbiness[id] = 35+((55*uint256(uint8(predictableRandom[3])))/255);
 
       return id;
@@ -64,13 +73,18 @@ contract YourCollectible is ERC721, Ownable {
                               name,
                               '", "description":"',
                               description,
-                              '", "external_url":"https://burnyboys.com/token/',
-                              id.toString(),
-                              '", "attributes": [{"trait_type": "color", "value": "#',
+                              '", "external_url":"https:/spacedev.io/"',
+                              ', "attributes": [{"trait_type": "color", "value": "#',
                               color[id].toColor(),
                               '"},{"trait_type": "chubbiness", "value": ',
                               uint2str(chubbiness[id]),
-                              '}], "owner":"',
+                              '}, {"trait_type": "teamPrimaryColor", "value": "#',
+                              background[id].backgroundPrimaryColor.toColor(),
+                              '"}, {"trait_type": "teamSecondaryColor", "value": "#',
+                              background[id].backgroundSecondaryColor.toColor(),
+                              '"}, {"trait_type": "sunOrMoonColor", "value": "#',
+                              background[id].sunOrMoonColor.toColor(),
+                              '"}], "owner":"',
                               (uint160(ownerOf(id))).toHexString(20),
                               '", "image": "',
                               'data:image/svg+xml;base64,',
@@ -97,6 +111,19 @@ contract YourCollectible is ERC721, Ownable {
   // Visibility is `public` to enable it being called by other contracts for composition.
   function renderTokenById(uint256 id) public view returns (string memory) {
     string memory render = string(abi.encodePacked(
+      '<linearGradient id="background" x1="0%" y1="0%" x2="0%" y2="50%">',
+        '<stop offset="0%" stop-color="#',
+        background[id].backgroundPrimaryColor.toColor(),
+        '" />',
+        '<stop offset="100%" stop-color="#',
+        background[id].backgroundSecondaryColor.toColor(),
+        '" />',
+      '</linearGradient>',
+      '<rect x="0" y="0" width="400" height="400" fill="url(#background)" />',
+      '<rect x="0" y="250" width="400" height="150" fill="#808080" />',
+      '<circle cx="370" cy="30" r="60" fill="#',
+      background[id].sunOrMoonColor.toColor(),
+      '" />',
       '<g id="eye1">',
           '<ellipse stroke-width="3" ry="29.5" rx="29.5" id="svg_1" cy="154.5" cx="181.5" stroke="#000" fill="#fff"/>',
           '<ellipse ry="3.5" rx="2.5" id="svg_3" cy="154.5" cx="173.5" stroke-width="3" stroke="#000" fill="#000000"/>',
