@@ -6,7 +6,7 @@
 ```bash
 git clone https://github.com/SpaceUY/se-challenge-8-svg-nft.git loogies-svg-nft
 
-cd loogies-svg-nft
+cd se-challenge-8-svg-nft
 
 git checkout loogies-svg-nft
 ```
@@ -26,7 +26,7 @@ yarn start
 > in a second terminal window:
 
 ```bash
-cd loogies-svg-nft
+cd se-challenge-8-svg-nft
 
 yarn chain
 
@@ -38,7 +38,7 @@ yarn chain
 
 
 ```bash
-cd loogies-svg-nft
+cd se-challenge-8-svg-nft
 
 yarn deploy
 
